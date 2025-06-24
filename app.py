@@ -70,6 +70,24 @@ if uploaded_file is not None:
         return [str(x).zfill(4)[-4:] for x in output]
 
     # =======================
+    # Simulasi Prediksi 100x
+    # =======================
+    def simulasi_prediksi(model_type, current_input, jumlah=100):
+        hasil = []
+        if model_type == "Markov":
+            for _ in range(jumlah):
+                hasil += prediksi_markov(current_input, n=1)
+        else:
+            try:
+                angka_int = [int(a) for a in angka]
+                model, scaler = train_lstm_model(angka_int)
+                last_seq = angka_int[-5:]
+                hasil = prediksi_lstm(model, scaler, last_seq, n=jumlah)
+            except Exception as e:
+                st.error(f"Error simulasi LSTM: {e}")
+        return hasil
+
+    # =======================
     # Interface
     # =======================
     st.subheader("Pilih Model Prediksi")
@@ -81,7 +99,6 @@ if uploaded_file is not None:
             prediksi = prediksi_markov(input_angka)
         else:
             try:
-                st.info("Melatih model LSTM...")
                 angka_int = [int(a) for a in angka]
                 model, scaler = train_lstm_model(angka_int)
                 last_seq = angka_int[-5:]
@@ -92,12 +109,11 @@ if uploaded_file is not None:
 
         st.success(f"Hasil prediksi ({model_choice}): {', '.join(prediksi)}")
 
-with st.expander("🔁 Simulasi 100x Prediksi"):
-    hasil_simulasi = simulasi_prediksi(model_choice, input_angka, jumlah=100)
-    freq = pd.Series(hasil_simulasi).value_counts().sort_values(ascending=False)
-    st.write("Frekuensi angka hasil simulasi:")
-    st.dataframe(freq.head(20))
-
+        with st.expander("🔁 Simulasi 100x Prediksi"):
+            hasil_simulasi = simulasi_prediksi(model_choice, input_angka, jumlah=100)
+            freq = pd.Series(hasil_simulasi).value_counts().sort_values(ascending=False)
+            st.write("Frekuensi angka hasil simulasi:")
+            st.dataframe(freq.head(20))
     else:
         st.warning("Masukkan angka 4 digit yang valid.")
 
