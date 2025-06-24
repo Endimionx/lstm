@@ -14,9 +14,15 @@ st.title("🎰 Prediksi Togel AI (Markov & LSTM)")
 st.markdown("Prediksi angka togel berdasarkan data histori menggunakan dua model: Markov dan LSTM.")
 
 # Upload data histori
-uploaded_file = st.file_uploader("Upload file histori angka (CSV, 4 digit)", type="csv")
+st.subheader("Masukkan histori angka 4 digit")
+teks_angka = st.text_area("Satu angka per baris", height=200, value="5712\n9701\n1098\n1445\n4431")
 
-if uploaded_file is not None:
+if teks_angka:
+    angka = [baris.strip().zfill(4) for baris in teks_angka.splitlines() if baris.strip().isdigit()]
+else:
+    angka = []
+if angka:
+
     data = pd.read_csv(uploaded_file, header=None)
     st.write("Contoh data:")
     st.dataframe(data.head())
@@ -117,8 +123,6 @@ if uploaded_file is not None:
     else:
         st.warning("Masukkan angka 4 digit yang valid.")
 
-else:
-    st.info("Silakan upload file CSV berisi histori angka (1 kolom, tanpa header).")
 
 st.markdown("---")
 st.caption("⚠️ Aplikasi ini hanya bersifat edukatif dan simulasi. Tidak menjamin hasil prediksi.")
