@@ -103,7 +103,7 @@ except Exception as e:
 
 # ==== AKURASI ====
 st.subheader("🔍 Uji Akurasi")
-jumlah_uji = st.slider("Jumlah data untuk uji akurasi", 5, min(50, len(angka_list)-6), 10)
+jumlah_uji = st.slider("Jumlah data untuk uji akurasi", 5, min(400, len(angka_list)-6), 10)
 
 def hitung_akurasi(data, model_type="LSTM"):
     benar = {'top1': 0, 'top3': 0, 'top5': 0}
