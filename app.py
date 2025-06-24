@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -13,7 +12,7 @@ st.set_page_config(page_title="Prediksi Togel AI", layout="centered")
 st.title("🎰 Prediksi Togel AI (Markov & LSTM)")
 st.markdown("Prediksi angka togel berdasarkan data histori menggunakan dua model: Markov dan LSTM.")
 
-# Upload data histori
+# Input manual histori angka
 st.subheader("Masukkan histori angka 4 digit")
 teks_angka = st.text_area("Satu angka per baris", height=200, value="5712\n9701\n1098\n1445\n4431")
 
@@ -21,17 +20,10 @@ if teks_angka:
     angka = [baris.strip().zfill(4) for baris in teks_angka.splitlines() if baris.strip().isdigit()]
 else:
     angka = []
+
 if angka:
 
-    data = pd.read_csv(uploaded_file, header=None)
-    st.write("Contoh data:")
-    st.dataframe(data.head())
-
-    angka = data[0].astype(str).str.zfill(4).tolist()
-
-    # =======================
     # MARKOV MODEL
-    # =======================
     transition = defaultdict(list)
     for i in range(len(angka) - 1):
         transition[angka[i]].append(angka[i+1])
@@ -42,9 +34,7 @@ if angka:
             return [str(random.randint(0, 9999)).zfill(4) for _ in range(n)]
         return random.choices(candidates, k=n)
 
-    # =======================
     # LSTM MODEL
-    # =======================
     def train_lstm_model(series):
         series = [int(x) for x in series]
         series = np.array(series).reshape(-1, 1)
@@ -75,9 +65,7 @@ if angka:
             output.append(int(scaler.inverse_transform(pred)[0][0]))
         return [str(x).zfill(4)[-4:] for x in output]
 
-    # =======================
-    # Simulasi Prediksi 100x
-    # =======================
+    # Simulasi
     def simulasi_prediksi(model_type, current_input, jumlah=100):
         hasil = []
         if model_type == "Markov":
@@ -93,9 +81,7 @@ if angka:
                 st.error(f"Error simulasi LSTM: {e}")
         return hasil
 
-    # =======================
     # Interface
-    # =======================
     st.subheader("Pilih Model Prediksi")
     model_choice = st.selectbox("Model", ["Markov", "LSTM"])
 
@@ -122,7 +108,6 @@ if angka:
             st.dataframe(freq.head(20))
     else:
         st.warning("Masukkan angka 4 digit yang valid.")
-
 
 st.markdown("---")
 st.caption("⚠️ Aplikasi ini hanya bersifat edukatif dan simulasi. Tidak menjamin hasil prediksi.")
