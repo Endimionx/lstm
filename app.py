@@ -25,6 +25,17 @@ def angka_to_digit_array(angka_list):
     return np.array([[int(d) for d in list(a)] for a in angka_list])
 
 if len(angka_list) >= 10:
+
+transition = defaultdict(list)
+for i in range(len(angka_list) - 1):
+    transition[angka_list[i]].append(angka_list[i+1])
+
+def prediksi_markov(current, n=5):
+    candidates = transition.get(current, [])
+    if not candidates:
+        return [str(random.randint(0, 9999)).zfill(4) for _ in range(n)]
+    return random.choices(candidates, k=n)
+
     X = angka_to_digit_array(angka_list)
     y = X[1:]
     X = X[:-1]
@@ -37,7 +48,17 @@ if len(angka_list) >= 10:
     n_input = 5
     generator = TimeseriesGenerator(X_scaled, y_scaled, length=n_input, batch_size=1)
 
-    # Model LSTM
+    
+st.subheader("Pilih Model Prediksi")
+model_choice = st.selectbox("Model", ["LSTM Digit", "Markov"])
+input_angka = st.text_input("Masukkan angka terakhir:", value=angka_list[-1])
+
+if model_choice == "Markov":
+    prediksi = prediksi_markov(input_angka, n=5)
+    st.success(f"🎯 Prediksi Markov: {', '.join(prediksi)}")
+
+
+# Model LSTM
     model = Sequential()
     model.add(LSTM(64, activation='relu', input_shape=(n_input, 4)))
     model.add(Dense(4))  # output 4 digit
