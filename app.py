@@ -205,4 +205,4 @@ st.info(f"🎯 Top-1: {acc_lstm['top1']}%")
 st.info(f"🎯 Top-3: {acc_lstm['top3']}%")
 st.info(f"🎯 Top-5: {acc_lstm['top5']}%")
 
-    st.caption("Top-5 artinya: angka aktual muncul di antara 5 angka hasil prediksi")
+st.caption("Top-5 artinya: angka aktual muncul di antara 5 angka hasil prediksi")
