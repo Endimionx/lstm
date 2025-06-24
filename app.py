@@ -14,7 +14,7 @@ st.markdown("Prediksi angka togel berdasarkan data histori menggunakan dua model
 
 # Input manual histori angka
 st.subheader("Masukkan histori angka 4 digit")
-teks_angka = st.text_area("Satu angka per baris", height=200, value="5712\n9701\n1098\n1445\n4431")
+teks_angka = st.text_area("Satu angka per baris", height=200, value="5712\n9701\n1098\n1445\n4431\n5706\n1092\n1826\n1415\n3784\n2585\n7460\n5061\n0482\n8870\n4736\n6775\n3748\n4403\n2846\n7523\n7981\n2001\n1655\n7002\n9321\n1102\n0874\n9911\n5566")
 
 if teks_angka:
     angka = [baris.strip().zfill(4) for baris in teks_angka.splitlines() if baris.strip().isdigit()]
@@ -23,7 +23,6 @@ else:
 
 if angka:
 
-    # MARKOV MODEL
     transition = defaultdict(list)
     for i in range(len(angka) - 1):
         transition[angka[i]].append(angka[i+1])
@@ -34,7 +33,6 @@ if angka:
             return [str(random.randint(0, 9999)).zfill(4) for _ in range(n)]
         return random.choices(candidates, k=n)
 
-    # LSTM MODEL
     def train_lstm_model(series):
         series = [int(x) for x in series]
         series = np.array(series).reshape(-1, 1)
@@ -65,7 +63,6 @@ if angka:
             output.append(int(scaler.inverse_transform(pred)[0][0]))
         return [str(x).zfill(4)[-4:] for x in output]
 
-    # Simulasi
     def simulasi_prediksi(model_type, current_input, jumlah=100):
         hasil = []
         if model_type == "Markov":
@@ -81,7 +78,6 @@ if angka:
                 st.error(f"Error simulasi LSTM: {e}")
         return hasil
 
-    # Interface
     st.subheader("Pilih Model Prediksi")
     model_choice = st.selectbox("Model", ["Markov", "LSTM"])
 
@@ -109,11 +105,9 @@ if angka:
     else:
         st.warning("Masukkan angka 4 digit yang valid.")
 
-    # ==============================
-    # 🔍 UJI AKURASI BACKTESTING
-    # ==============================
+    # 🔍 Uji Akurasi
     st.markdown("---")
-    st.subheader("🔍 Uji Akurasi Model (Backtesting)")
+    st.subheader("🔍 Uji Akurasi Model (Top-1 / Top-3 / Top-5)")
 
     jumlah_uji = st.slider("Berapa banyak data terakhir yang digunakan untuk uji akurasi?", min_value=10, max_value=min(50, len(angka)-6), value=20)
 
@@ -132,7 +126,8 @@ if angka:
                     model, scaler = train_lstm_model(angka_int)
                     last_seq = angka_int[-5:]
                     prediksi = prediksi_lstm(model, scaler, last_seq, n=5)
-                except:
+                except Exception as e:
+                    st.warning(f"⚠️ LSTM error di baris {i}: {e}")
                     continue
             if target == prediksi[0]:
                 hasil['top1'] += 1
@@ -164,4 +159,4 @@ if angka:
         st.info(f"🎯 Top-5: {acc_lstm['top5']}%")
 
 st.markdown("---")
-st.caption("⚠️ Aplikasi ini hanya bersifat edukatif dan simulasi. Tidak menjamin hasil prediksi.")
+st.caption("⚠️ Aplikasi ini hanya untuk edukasi. Tidak menjamin hasil prediksi.")
