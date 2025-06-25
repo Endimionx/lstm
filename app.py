@@ -1,4 +1,3 @@
-
 import streamlit as st
 import numpy as np
 import random
@@ -51,7 +50,8 @@ if len(angka_list) < 10:
     st.warning("Masukkan minimal 10 angka histori.")
     st.stop()
 
-def angka_to_digit_array(data): return np.array([[int(d) for d in list(a)] for a in data])
+def angka_to_digit_array(data):
+    return np.array([[int(d) for d in list(a)] for a in data])
 
 # ==== PILIH MODEL ====
 st.subheader("Pilih Model")
@@ -86,7 +86,7 @@ def prediksi_multi(model, scaler, last_seq, n=5):
     for _ in range(n):
         p = model.predict(np.expand_dims(last_seq, axis=0), verbose=0)
         d = np.round(scaler.inverse_transform(p)).astype(int).flatten()
-        out.append(''.join([str(min(max(0, x),9)) for x in d]))
+        out.append(''.join([str(min(max(0, x), 9)) for x in d]))
     return out
 
 # ==== PREDIKSI ====
@@ -95,7 +95,7 @@ try:
     if model_choice == "Markov":
         pred = prediksi_markov(input_angka)
     else:
-        model, scaler, Xs = train_model(angka_list, use_gru=(model_choice=="GRU Digit"))
+        model, scaler, Xs = train_model(angka_list, use_gru=(model_choice == "GRU Digit"))
         pred = prediksi_multi(model, scaler, Xs[-5:], n=5)
     st.success(f"🎯 Prediksi: {', '.join(pred)}")
 except Exception as e:
@@ -103,24 +103,32 @@ except Exception as e:
 
 # ==== AKURASI ====
 st.subheader("🔍 Uji Akurasi")
-jumlah_uji = st.slider("Jumlah data untuk uji akurasi", 5, min(400, len(angka_list)-6), 10)
+jumlah_uji = st.slider("Jumlah data untuk uji akurasi", 5, min(50, len(angka_list)-6), 10)
 
 def hitung_akurasi(data, model_type="LSTM"):
+    if len(data) < jumlah_uji + 6:
+        st.error("❌ Data tidak cukup untuk uji akurasi. Masukkan setidaknya " + str(jumlah_uji + 6) + " angka.")
+        return {'top1': 0.0, 'top3': 0.0, 'top5': 0.0}
+
     benar = {'top1': 0, 'top3': 0, 'top5': 0}
     total = 0
     for i in range(len(data) - jumlah_uji - 1, len(data) - 1):
         try:
             input_val = data[i]
-            target = data[i+1]
+            target = data[i + 1]
             if model_type == "Markov":
                 hasil = prediksi_markov(input_val, n=5)
             else:
-                potong = data[:i+1]
-                model, scaler, Xs = train_model(potong, use_gru=(model_type=="GRU"))
+                potong = data[:i + 1]
+                model, scaler, Xs = train_model(potong, use_gru=(model_type == "GRU"))
                 hasil = prediksi_multi(model, scaler, Xs[-5:], n=5)
-            if target == hasil[0]: benar['top1'] += 1
-            if target in hasil[:3]: benar['top3'] += 1
-            if target in hasil: benar['top5'] += 1
+
+            if target == hasil[0]:
+                benar['top1'] += 1
+            if target in hasil[:3]:
+                benar['top3'] += 1
+            if target in hasil:
+                benar['top5'] += 1
             total += 1
         except Exception as e:
             st.warning(f"Gagal prediksi @index {i}: {e}")
